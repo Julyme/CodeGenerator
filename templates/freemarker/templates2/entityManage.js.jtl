@@ -1,0 +1,79 @@
+	function iniPageElements() {
+		pageElements.grid = $("#grid");
+		pageElements.pager = $("#pager");
+		pageElements.container = $("#container");
+	}
+	function iniStaticPage() {
+	}
+	function iniData() {
+		var myGridSetting = {
+			caption : "管理${asiaName}",
+			postData : [ "true" ],
+			datatype : function(postData) {
+				var dwrArgs = ObjectTemplate.getDwrArgs.apply(this,
+						[ postData ]);
+				${name}Service.dwrFunForJqGrid.apply(this, dwrArgs);
+			},
+			dataProxy:function(arg)
+			{
+				if(arg && arg.data && arg.data.id)
+				{
+					if(arg.data.oper=="add")
+					{
+						var argcopy = JSON.parse(JSON.stringify(arg.data));
+						delete argcopy.id;
+						delete argcopy.oper;
+						${name}Service.saveWithEntity.call(this,argcopy,function(data)
+						{
+							var args =  ObjectTemplate.addRecall.call(this,data);
+							arg.complete.apply(this,args);
+						});
+					}
+					else if(arg.data.oper=="edit")
+					{
+						var condition ="${name?lower_case}_id = '"+arg.data.id+"'";
+						var argcopy = JSON.parse(JSON.stringify(arg.data));
+						delete argcopy.id;
+						delete argcopy.oper;
+						${name}Service.update${name}.call(this,argcopy,condition,function(data)
+						{
+							var args =  ObjectTemplate.editRecall.call(this,data);
+							arg.complete.apply(this,args);
+						});
+					}
+					else if(arg.data.oper=="del")
+					{
+						var idstr= arg.data.id;
+						var ids = idstr.split(',');
+						${name}Service.deleteByIds.call(this,ids,function(data)
+						{
+							var args =  ObjectTemplate.delRecall.call(this,data);
+							arg.complete.apply(this,args);
+						});
+					}
+				}
+			},
+			sortname : '${keyField.name}',
+			colNames : [
+				'${keyField.asiaName}'<#if (normalField?size>0) >,<#list normalField as pro>
+				'${pro.asiaName}'<#if pro_has_next>,</#if></#list></#if>
+			],
+			colModel : [{key:true,
+				name:'${keyField.name}',
+				index:'${keyField.name}'
+				}<#if (normalField?size>0) >,<#list normalField as pro>{
+				name : '${pro.name}',
+				index : '${pro.name}'}<#if pro_has_next>,</#if></#list></#if>
+			]
+		};
+		pageData.gridSetting = $.extend(ObjectTemplate.gridSetting,myGridSetting);
+	}
+	function iniDataPage() {
+		pageElements.grid.jqGrid(pageData.gridSetting);
+		pageElements.grid.jqGrid("navGrid", "#pager",ObjectTemplate.pagerSetting.enable,ObjectTemplate.pagerSetting.editSetting,ObjectTemplate.pagerSetting.addSetting,ObjectTemplate.pagerSetting.delSetting,ObjectTemplate.pagerSetting.searchSetting,ObjectTemplate.pagerSetting.viewSetting);
+		$(window).resize(function() {
+			pageElements.grid.setGridWidth(pageElements.container.width());
+		});
+	}
+	function iniAsynData(){
+	}

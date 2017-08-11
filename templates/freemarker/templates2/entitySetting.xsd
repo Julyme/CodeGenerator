@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.wamdy.com/entitySettingSchema"
+	elementFormDefault="unqualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.wamdy.com/entitySettingSchema">
+	<element name="setting">
+		<complexType>
+			<sequence maxOccurs="unbounded" minOccurs="0">
+				<element ref="tns:relation"></element>
+			</sequence>
+		</complexType>
+	</element>
+	<element name="relation">
+		<complexType>
+			<sequence maxOccurs="1" minOccurs="1">
+				<element ref="tns:source" maxOccurs="1" minOccurs="1"></element>
+				<element ref="tns:target" maxOccurs="1" minOccurs="1"></element>
+			</sequence>
+		</complexType>
+	</element>
+	<element name="target" type="tns:TargetType">
+
+	</element>
+	<element name="source">
+		<simpleType>
+			<restriction base="string">
+				<whiteSpace value="collapse"></whiteSpace>
+				<minLength value="1"></minLength>
+			</restriction>
+		</simpleType>
+	</element>
+
+	<simpleType name="NillableStrType">
+		<restriction base="string">
+			<whiteSpace value="collapse"></whiteSpace>
+			<minLength value="1"></minLength>
+		</restriction>
+	</simpleType>
+
+    <complexType name="TargetType">
+    	<simpleContent>
+    		<extension base="tns:NillableStrType">
+    			<attribute name="classAlias" use="required">
+    				<simpleType>
+    					<restriction base="string">
+    						<minLength value="1"></minLength>
+    						<whiteSpace value="collapse"></whiteSpace>
+    					</restriction>
+    				</simpleType>
+    			</attribute>
+
+    			<attribute name="linkType" default="0" use="optional">
+    				<simpleType>
+    					<restriction base="string">
+    						<enumeration value="0"></enumeration>
+    						<enumeration value="1"></enumeration>
+    					</restriction>
+    				</simpleType>
+    			</attribute>
+    			<attribute name="simpleText" type="string"></attribute>
+    		</extension>
+    	</simpleContent>
+    </complexType>
+</schema>

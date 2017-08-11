@@ -1,0 +1,175 @@
+package ${basePackage}.${moduleName}.entity;
+
+import java.util.Map;
+<#if (table.hasDateColumn)>
+import java.sql.Date;
+</#if>
+<#if (table.hasBigDecimalColumn)>
+import java.math.BigDecimal;
+</#if>
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+
+<#list importData as imda> 
+import ${imda};
+</#list>
+
+import org.directwebremoting.annotations.DataTransferObject;
+
+import  ${package}.entity.AbstractEntity;
+
+/**
+ * ${note}
+ * 
+ * <#if (author?length > 0)>@author ${author}</#if>
+ * 
+ */
+@Entity
+@DataTransferObject
+public class ${name} extends AbstractEntity {
+	private static final long			serialVersionUID	= 1L;
+	private static final String[] PROPERTICE_NAME = new String[] {
+			"${keyField.name}"<#if (normalField?size>0) >,<#list normalField as pro>
+			"${pro.name}"<#if pro_has_next>,</#if></#list></#if>
+	};
+	private static final Class<?>[] PROPERTICE_TYPE = new Class[] {
+			${keyField.type}.class<#if (normalField?size>0) >,<#list normalField as pro>
+			${pro.type}.class<#if pro_has_next>,</#if></#list></#if>
+	};
+
+	public ${name}(){
+		
+	}
+	
+	public ${name}(Map<String, Object> data){
+		try {
+			this.setProperties(data);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	@Transient
+	@Override
+	public String getEntityKey() {
+		return get${keyField.name?cap_first}();
+	}
+
+	@Transient
+	@Override
+	public void setEntityKey(String key) {
+		set${keyField.name?cap_first}(key);
+	}
+	
+	<#if (keyField.note?length>0)>
+	/**
+	 * ${keyField.note}
+	 */
+	</#if>
+	@Id
+	<#if keyField.dbType=="text">(columnDefinition="Text")</#if>
+	public ${keyField.type} get${keyField.name?cap_first}() {
+		Object obj = getProperties().get(PROPERTICE_NAME[0]);
+		<#switch keyField.type>
+			<#case "String">
+		    return obj != null ? obj.toString() : null;
+			<#break>
+		  	<#case "boolean">
+		  	<#case "Boolean">
+		    return obj != null ? (Boolean)obj : false;
+			<#break>
+			<#case "int">
+			<#case "Integer">
+		    return obj != null ? (Integer)obj : 0;
+			<#break>
+			<#case "Date">
+		    return obj != null ? (Date)obj : null;
+			<#break>
+			<#case "short">
+			<#case "Short">
+		    return obj != null ? (Short)obj : 0;
+			<#break>
+			<#case "long">
+			<#case "Long">
+		    return obj != null ? (Long)obj : 0;
+			<#break>
+			<#case "float">
+			<#case "Float">
+		    return obj != null ? (Float)obj : 0;
+			<#break>
+			<#case "double">
+			<#case "Double">
+		    return obj != null ? (Double)obj : 0;
+			<#break>
+		</#switch>
+	}
+	public void set${keyField.name?cap_first}(${keyField.type} ${keyField.name}) {
+		getProperties().put(PROPERTICE_NAME[0], ${keyField.name});
+	}
+	
+	<#list normalField as pro>
+	<#if (pro.note?length > 0)>
+	/**
+	 * ${pro.note}
+	 */
+	</#if>
+	@Column<#if pro.dbType=="text">(columnDefinition="Text")</#if>
+	public ${pro.type} get${pro.name?cap_first}() {
+		Object obj = getProperties().get(PROPERTICE_NAME[${pro.index}]);
+		<#switch pro.type>
+			<#case "String">
+		    return obj != null ? obj.toString() : null;
+			<#break>
+		  	<#case "boolean">
+		  	<#case "Boolean">
+		    return obj != null ? (Boolean)obj : false;
+			<#break>
+			<#case "int">
+			<#case "Integer">
+		    return obj != null ? (Integer)obj : 0;
+			<#break>
+			<#case "Date">
+		    return obj != null ? (Date)obj : null;
+			<#break>
+			<#case "short">
+			<#case "Short">
+		    return obj != null ? (Short)obj : 0;
+			<#break>
+			<#case "long">
+			<#case "Long">
+		    return obj != null ? (Long)obj : 0;
+			<#break>
+			<#case "float">
+			<#case "Float">
+		    return obj != null ? (Float)obj : 0;
+			<#break>
+			<#case "double">
+			<#case "Double">
+		    return obj != null ? (Double)obj : 0;
+			<#break>
+		</#switch>
+	}
+
+	public void set${pro.name?cap_first}(${pro.type} ${pro.name}) {
+		getProperties().put(PROPERTICE_NAME[${pro.index}], ${pro.name});
+	}
+	</#list>
+
+	@Transient
+	@Override
+	public String[] getEntityPropertiesName() {
+		return PROPERTICE_NAME;
+	}
+
+	@Transient
+	@Override
+	public Class<?>[] getEntityPropertiesType() {
+		return PROPERTICE_TYPE;
+	}
+	@Override
+	public String toString()
+	{
+		return this.getProperties().toString();
+	}
+}

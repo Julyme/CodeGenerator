@@ -1,0 +1,13 @@
+className→name
+→asiaName
+isID→
+isField→
+isText→
+index→
+proName→name
+proType→type
+proAsia→asiaName
+proNote→note
+foreigns→
+properties→keyField+normalField
+

@@ -1,0 +1,61 @@
+<%--外部依赖项
+JsCssLoader.java
+
+ --%>
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%-- 如果需要struts标签库支持
+<%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@ taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+--%>
+<%-- 处理basepath --%>
+<%@ page language="java" import="java.util.*"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + path + "/";
+%>
+<!DOCTYPE html>
+<html>
+<head>
+<%--处理basepath--%>
+<base href="<%=basePath%>" />
+<%--   <base/>不处理base--%>
+<title>${note}选择</title>
+<%--JsCssLoader--%>
+<%@ page import="com.wamdy.util.JsCssLoader"%>
+<%
+	JsCssLoader loader = new JsCssLoader("common,jquery,dwr,watermark,ObjectTemplate,util,jqgrid,dialog");//参看jscss文件
+%>
+<%=loader.getCssFilesStr()%>
+<%=loader.getJsFilesStr()%>
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta http-equiv="description" content="${note}选择">
+<!--
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	-->
+<%-- 与实体相关的js 和 	css--%>
+<script type='text/javascript' src='dwr/interface/${name}Service.js'></script>
+<%-- 与jsp session相关的东西放入js中 --%>
+<script type='text/javascript' src='js/manage/${name?lower_case}/${name}Select.js'></script>
+</head>
+<body style="height: 100%; background: transparent;">
+	<div id="container">
+		<table id="grid"></table>
+		<div id="pager"></div>
+	</div>
+	<div>
+		<fieldset id="selectedFieldset" style="min-height: 56px;">
+			<legend style="font-size: 13px; cursor: default">
+				已选择： <label id="clearAllSelected" style="font-size: 13px; cursor: pointer"> <a> [清空] </a>
+				</label>
+			</legend>
+			<div id="selectedRows" title="已选择"
+				style="padding: 0px; height: 88px; overflow-x: hidden; overflow-y: auto;">
+			</div>
+		</fieldset>
+	</div>
+</body>
+</html>

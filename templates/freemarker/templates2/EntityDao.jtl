@@ -1,0 +1,29 @@
+package ${package}.dao.${name?uncap_first};
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Component;
+
+import ${package}.dao.BaseDao;
+import ${package}.entity.${name};
+@Component
+public class ${name}EntityDao extends BaseDao implements I${name}EntityDao {
+
+	@Override
+	public Class<?> getEntity() {
+		return ${name}.class;
+	}
+	
+	public List<${name}> find${name}s(String[] property, String condition,
+			boolean needLink, int index, int limit) {
+		List<Map<String, Object>> list = get(property, condition, needLink, index, limit);
+		List<${name}> results = new ArrayList<${name}>(list.size());
+		for(Map<String, Object> item : list){
+			results.add(new ${name}(item));
+		}
+		return results;
+	}
+
+}

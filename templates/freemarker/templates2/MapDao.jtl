@@ -1,0 +1,36 @@
+package ${package}.dao.${name?uncap_first};
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Component;
+
+import ${package}.dao.BaseDao;
+import ${package}.entity.${name};
+
+@Component
+public class ${name}MapDao extends BaseDao implements I${name}MapDao {
+
+	@Override
+	public Class<?> getEntity() {
+		return ${name}.class;
+	}
+
+	public List<Map<String, Object>> find${name}s(String[] property,
+			String condition, String sortField, String order, boolean needLink,
+			int index, int limit) {
+		return get(property, condition, sortField, order, needLink, index, limit);
+	}
+
+	@Override
+	public int findCount(String[] properties, String condition, boolean needLink) {
+		return getCount(properties, condition, needLink);
+	}
+	
+	
+	@Override
+	public int update${name}(Map<String, Object> properties, String condition) {
+		return this.updateProperties(properties, condition);
+	}
+
+}

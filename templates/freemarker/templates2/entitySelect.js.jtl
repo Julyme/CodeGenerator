@@ -1,0 +1,278 @@
+
+//var pageData = {};// 所有要用到的数据对象放入此对象
+//var pageElements = {};// 所有要用到的页面元素的引用放入此对象
+//// 方法
+//var StaticPageFuns = {};// 放对静态页面进行操作的方法
+//var DataFuns = {};// 存放获取同步数据的方法
+//var DataPageFuns = {};// 存放根据静态数据对页面直接操作方法
+//var AsynDataFuns = {};// 存放异步方法的对象
+//var AsynDataRecallFuns = {};// 存放异步方法回调用的对象
+//var AsynDataPageFuns = {};// 存放异步方法回调时操作页面的对象
+//var GridFuns = {};// 存放操作表格的一些方法
+
+function iniPageElements() {
+	pageElements.grid = $("#grid");
+	pageElements.pager = $("#pager");
+	pageElements.container = $("#container");
+	pageElements.selectedFieldset = $("#selectedFieldset");
+	pageElements.clearAllSelected = $("#clearAllSelected");
+	pageElements.selectedRows = $("#selectedRows");
+}
+function iniStaticPage() {
+	pageElements.clearAllSelected.bind("click",DataPageFuns.unSelectAll);
+}
+function iniData() {
+	pageData.selectedRows = [];
+	pageData.singleSelect = false;
+	pageData.pagerEnable ={
+			edit : false,
+			add : false,
+			del : false,
+			search : true,
+			view:false
+		};
+	var myGridSetting = {
+		caption : "选择${asiaName}",
+		postData : [ "true" ],
+		datatype : function(postData) {
+				var dwrArgs = ObjectTemplate.getDwrArgs.apply(this,
+						[ postData ]);
+				${name}Service.dwrFunForJqGrid.apply(this, dwrArgs);
+			},
+		dataProxy:function(arg)
+		{
+			if(arg && arg.data && arg.data.id)
+			{
+				if(arg.data.oper=="add")
+				{
+					var argcopy = JSON.parse(JSON.stringify(arg.data));
+					delete argcopy.id;
+					delete argcopy.oper;
+					${name}Service.saveWithEntity.call(this,argcopy,function(data)
+					{
+						var args =  ObjectTemplate.addRecall.call(this,data);
+						arg.complete.apply(this,args);
+					});
+				}
+				else if(arg.data.oper=="edit")
+				{
+					var condition ="${name?lower_case}_id = '"+arg.data.id+"'";
+					var argcopy = JSON.parse(JSON.stringify(arg.data));
+					delete argcopy.id;
+					delete argcopy.oper;
+					${name}Service.update${name}.call(this,argcopy,condition,function(data)
+					{
+						var args =  ObjectTemplate.editRecall.call(this,data);
+						arg.complete.apply(this,args);
+					});
+				}
+				else if(arg.data.oper=="del")
+				{
+					var idstr= arg.data.id;
+					var ids = idstr.split(',');
+					${name}Service.deleteByIds.call(this,ids,function(data)
+					{
+						var args =  ObjectTemplate.delRecall.call(this,data);
+						arg.complete.apply(this,args);
+					});
+				}
+			}
+		},
+		sortname : '${keyField.name}',
+		colNames : [
+			'${keyField.asiaName}'<#if (normalField?size>0) >,<#list normalField as pro>
+			'${pro.asiaName}'<#if pro_has_next>,</#if></#list></#if>
+		],
+		colModel : [{key:true,
+			name:'${keyField.name}',
+			index:'${keyField.name}'
+			}<#if (normalField?size>0) >,<#list normalField as pro>{
+			name : '${pro.name}',
+			index : '${pro.name}'}<#if pro_has_next>,</#if></#list></#if>
+		],
+		onSelectRow:function(rowid,status)
+		{
+			if(status)
+			{
+				DataPageFuns.selectRow(rowid);
+			}else
+			{
+				DataPageFuns.unSelectRow(rowid);
+			}
+		},
+		onSelectAll:function(aRowids,status)
+		{
+			if(status)
+			{
+				DataPageFuns.selectCurPageRows(aRowids);
+			}else
+			{
+				DataPageFuns.unSelectCurPageRows(aRowids);
+			}
+		},
+		loadComplete:function()
+		{
+			StaticPageFuns.setGridSelectRows(pageData.selectedRows);
+			$(window).trigger('resize');
+		}
+	};
+	pageData.gridSetting = $.extend(ObjectTemplate.gridSetting, myGridSetting);
+	
+}
+function iniDataPage() {
+	pageElements.grid.jqGrid(pageData.gridSetting);
+	pageElements.grid.jqGrid("navGrid", "#pager",pageData.pagerEnable);
+	$(window).resize(function() {
+		pageElements.grid.setGridWidth(pageElements.container.width());
+	});
+}
+function iniAsynData() {
+}
+StaticPageFuns.getFieldSetNode= function(id, name) {
+	return "<fieldset  style = \"width:140px;float:left;margin-left:10px;\" id='"
+			+ id
+			+ "' title='"
+			+ name
+			+ "' ><div style=\"float:left;cursor:default;width:90px;overflow:hidden;\">"
+			+ name
+			+ "</div><div style=\"float:right;cursor:pointer ;\" onclick=\"DataPageFuns.unSelectRowAtGridOutside('"
+			+ id
+			+ "');\" title=\"取消该人员\" class=\"removeDiv\"><a>[删除]</a></div></fieldset>";
+};
+StaticPageFuns.checkFieldSetVisible = function() {
+	if (pageData.selectedRows.length != 0) {
+		pageElements.selectedFieldset.show();
+	}
+	if (pageData.selectedRows.length == 0) {
+		pageElements.selectedFieldset.hide();
+	}
+};
+StaticPageFuns.setGridSelectRow = function(rowId)
+{
+	pageElements.grid.jqGrid("resetSelection", rowId);
+	pageElements.grid.jqGrid("setSelection", rowId, false);//false表示不重新加载表格
+};
+StaticPageFuns.setGridunSelectRow = function(rowId)
+{
+	pageElements.grid.jqGrid("resetSelection", rowId);
+};
+StaticPageFuns.setGridSelectRows = function(rowIds)
+{
+	for(var index in rowIds)
+	{
+		var rowid = rowIds[index].${name?lower_case}_id;
+		StaticPageFuns.setGridSelectRow(rowid);
+	}
+};
+StaticPageFuns.selectRow = function(rowData)
+{
+	if(rowData == null)
+	{
+		return;
+	}
+	var html = StaticPageFuns.getFieldSetNode(rowData.${name?lower_case}_id,rowData.name);
+	pageElements.selectedRows.append(html);
+};
+StaticPageFuns.unSelectRow = function(rowid)
+{
+	//由于是后面动态添加的内容，因此不能在pageElements中缓存
+	$("#selectedRows fieldset").remove("#" + rowid);
+};
+StaticPageFuns.unSelectAll = function()
+{
+	pageElements.grid.jqGrid("resetSelection");
+	pageElements.selectedRows.empty();
+};
+DataFuns.isSelected = function(rowid) {
+	var exist = false;
+	for ( var index in pageData.selectedRows) {
+		if (pageData.selectedRows[index]["${name?lower_case}_id"] == rowid) {
+			exist = true;
+			break;
+		}
+	}
+	return exist;
+};
+DataFuns.selectRow = function(rowid)
+{
+	var rowData = null;
+	if(DataFuns.isSelected(rowid) == false)
+	{
+		rowData = pageElements.grid.getRowData(rowid);
+		if(pageData.singleSelect)
+		{
+			pageData.selectedRows[0] = rowData;
+		}else
+		{
+			pageData.selectedRows[pageData.selectedRows.length] = rowData;
+		}
+	}
+	return rowData;
+};
+DataFuns.unSelectRow = function(rowid)
+{
+	for(var index in pageData.selectedRows)
+	{
+		if(pageData.selectedRows[index]["${name?lower_case}_id"] == rowid)
+		{
+			pageData.selectedRows.splice(index, 1);
+		}
+	}
+};
+DataFuns.unSelectAll = function()
+{
+	pageData.selectedRows.length = 0;
+};
+
+
+DataPageFuns.selectRow = function(rowid)
+{
+	var rowData = DataFuns.selectRow(rowid);
+	StaticPageFuns.selectRow(rowData);
+	StaticPageFuns.checkFieldSetVisible();
+};
+DataPageFuns.unSelectRow = function(rowid)
+{
+	DataFuns.unSelectRow(rowid);
+	StaticPageFuns.unSelectRow(rowid);
+	StaticPageFuns.checkFieldSetVisible();
+};
+DataPageFuns.selectRowAtGridOutside = function(rowid)
+{
+	DataPageFuns.selectRow(rowid);
+	StaticPageFuns.setGridSelectRow(rowid);
+};
+DataPageFuns.unSelectRowAtGridOutside = function(rowid)
+{
+	DataPageFuns.unSelectRow(rowid);
+	StaticPageFuns.setGridunSelectRow(rowid);
+};
+DataPageFuns.selectCurPageRows = function(pageRowIds)
+{
+	for(var index in pageRowIds)
+	{
+		DataPageFuns.selectRow(pageRowIds[index]);
+	}
+};
+DataPageFuns.unSelectCurPageRows = function(pageRowIds) {
+	for(var index in pageRowIds)
+	{
+		DataPageFuns.unSelectRow(pageRowIds[index]);
+	}
+};
+DataPageFuns.unSelectAll = function()
+{
+	DataFuns.unSelectAll();
+	StaticPageFuns.unSelectAll();
+	StaticPageFuns.checkFieldSetVisible();
+};
+
+DataPageFuns.reAddSelectedRow = function(rowIds)
+{
+	for(var index in rowIds)
+	{
+		DataPageFuns.selectRowAtGridOutside(rowIds[index]);
+	}
+	
+};
+

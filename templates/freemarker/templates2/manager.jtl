@@ -1,0 +1,285 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<%
+String path = request.getContextPath();
+%>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" media="screen" href="<%=path %>/css/plugins/jquery-ui-1.8.14.custom.jqgrid/jquery-ui-1.8.14.custom.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="<%=path %>/css/plugins/components/ui.jqgrid.css" /> 
+<link rel="stylesheet" type="text/css" media="screen" href="<%=path %>/css/plugins/components/ui.multiselect.css" /> 
+<!-- <link rel="stylesheet" type="text/css" href="<%=path %>/css/plugins/jquery-ui-1.8.14/base/jquery.ui.core.css"> -->
+<!-- <link rel="stylesheet" type="text/css" href="<%=path %>/css/plugins/jquery-ui-1.8.14/base/jquery.ui.theme.css"> -->
+<link rel="stylesheet" type="text/css" href="<%=path %>/css/plugins/components/jqgrid.css">
+<link rel="stylesheet" href="<%=path %>/css/plugins/components/zTreeStyle/zTreeStyle.css" type="text/css">
+
+<script src="<%=path %>/js/jquery/jquery-1.6.2.min.js" type="text/javascript"></script> 
+<script src="<%=path %>/plugins/jquery-ui-1.8.14.custom/jquery-ui-1.8.14.custom.min.js" type="text/javascript"></script> 
+<script src="<%=path %>/js/jquery/i18n/grid.locale-cn.js" type="text/javascript"></script> 
+<script src="<%=path %>/plugins/components/ui.multiselect.js" type="text/javascript"></script> 
+<script src="<%=path %>/js/jquery/jquery.jqGrid.src.js" type="text/javascript"></script> 
+<script src="<%=path %>/js/jquery/jquery.ztree-2.6.js" type="text/javascript"></script> 
+
+<script type='text/javascript' src='<%=path %>/dwr/engine.js'></script>
+<script type='text/javascript' src='<%=path %>/dwr/interface/${name}Service.js'></script> 
+<script type='text/javascript' src='<%=path %>/dwr/interface/OrganizationService.js'></script> 
+<script language='javascript' src='<%=path %>/js/util/WindowManage.js'></script>
+<script language='javascript' src='<%=path %>/js/util/DialogUtil.js'></script>
+
+
+<style type="text/css">
+	<!--
+		a{ text-decoration: none;}
+	--> 
+</style>
+
+<title>${name}管理</title>
+
+<script type="text/javascript">
+//zTree数据对象---------------------------------------------
+
+	var zTreeObj;
+	var treeSetting = {
+		nameCol : "organizationName",
+		async : true,
+ 		asyncUrl : "http://127.0.0.1:8080/WebConnector/data.jsp",
+//  		asyncParam : ["organizationCode"],
+//  	   	nameCol:'organizationName',
+ 		dwr:true,
+ 		dwrFun:OrganizationService.findSubOrganizationsWithMap,
+ 		needLink:true,
+ 		properties:['organizationCode','parentCode','organizationName'],
+ 		condition:'',
+ 		sortField:'',
+ 		order:'',
+//  		rootPID : -1,
+ 	    treeNodeKey : "organizationCode",
+//  	    treeNodeParentKey : "pId",
+ 	   	callback:{
+ 	   		click : function(event, treeId, treeNode){
+ 	   			var condition="";
+ 	   			if(treeNode['organizationCode'] && treeNode['organizationCode'] != null){
+ 	   				condition = "department LIKE '%"+treeNode['organizationCode']+"%'";
+ 	   			}
+	 	   		jQuery("#${name}Table").setGridParam({
+	 	   			selectCondition : condition
+	 			}).setGridParam({
+	 				total : -1
+	 			}).trigger("reloadGrid");
+ 	   		}
+ 	   	},
+ 	   	nameFormatter:function(name,node){
+ 	   		return name+'(1)';
+ 	   	}
+	};
+	var zNodes = [{
+		id : null,
+		organizationName:"所有部门",
+// 		pId:"-1",
+		isParent : true
+	}];
+
+//jqGrid的数据对象------------------------------------------------
+	var gridSetting={
+			url : 'null',
+			height:'auto',
+			datatype : "json",
+			dwrFun : ${name}Service.findMapByProperty,
+			dwrCountFun : ${name}Service.findCountByProperty,
+			condition : '',
+			searchCondition : '',
+			selectCondition : '',
+			needLink : true,
+			dwr : true,
+			autowidth:true,
+			colNames : [ (
+				<#assign index = 0>
+				<#list properties as pro>
+					<#if pro.listShow >
+						<#if index !=0>,</#if><#assign index = 1>
+						'${pro.fieldName}'
+					</#if>
+				</#list>) ],
+			colModel : [ 
+				<#assign index = 0>
+				<#list properties as pro>
+					<#if pro.listShow >
+					<#if index !=0>,</#if><#assign index = 1>
+					{
+						<#if pro.isId == 1 >key:true,</#if>
+						<#if pro.sortable == false >sortable : false,</#if>
+						name : '${pro.proName}',
+						index : '${pro.proName}'
+					}
+				</#if></#list>
+			],
+			rowNum : 10,
+			rowList : [ 10, 20, 30 ],
+			pager : '#${name}Pager',
+			viewrecords : true,
+			rownumbers : false,
+			jsonReader : {
+				root : "rows",
+				page : "page",
+				total : "total",
+				records : "records", // 总记录数
+				repeatitems : false
+			// 设置成false，在后台设置值的时候，可以乱序。且并非每个值都得设
+			},
+			ondblClickRow:function(rowid,iRow,iCol,e){//双击表格的行
+				showFun(rowid);
+			},
+			multiselect:true,
+			multiboxonly:true
+		};
+
+//页面加载执行----------------------------------------------------------------------
+	$(document).ready(function() {
+		//合并用户的配置对象
+// 		UserOperator.documentReady();
+		
+		jQuery("#${name}Table").jqGrid(gridSetting);
+		jQuery("#${name}Table").jqGrid('navGrid', '#${name}Pager', {
+			edit : false,
+			add : false,
+			del : false,
+			search:false
+		});
+		$(window).bind('resize', function() { 
+		    $("#${name}Table").setGridWidth($("#MainArea").width()-2); 
+		}).trigger('resize'); 
+		
+		//加载树
+		zTreeObj = $("#${name}Tree").zTree(treeSetting,zNodes);
+		zTreeObj.expandNode(zNodes[0], true, false);
+	});
+	
+	
+//功能方法---------------------------------------------------------
+	
+	function quickSearch() {
+		var curValue = $("#${name}Code")[0].value;
+		if (curValue != '') {
+			curValue = "operatorCode LIKE '%" + curValue + "%'";
+		}
+		jQuery("#${name}Table").setGridParam({
+			searchCondition : curValue
+		}).trigger("reloadGrid");
+	}
+	function addFun(){
+		alert("添加数据");
+	}
+	function editFun(rowId){
+		if(rowId != null){
+			alert("编辑ID为"+rowId+"的数据");
+		}else{
+			alert("请选择数据");
+		}
+	}
+	function deleteFun(rowId){
+		if(rowId != null){
+			alert("删除ID为"+rowId+"的数据");
+		}else{
+			alert("请选择数据");
+		}
+	}
+	function deleteSelectedsFun(){
+		var selrow = getSelectedRowIDs();
+		if(selrow != null && selrow.length > 0){
+			alert("删除ID为"+selrow+"的数据");
+		}else{
+			alert("请选择数据");
+		}
+	}
+	function showFun(rowid){
+		var selrow = rowid ? rowid : getSelectedRowID();
+		if(selrow != null){
+			alert("查看ID为"+selrow+"的数据");
+		}else{
+			alert("请选择数据");
+		}
+		DialogUtil.openFloatWindow("${name}Edit.html",{operatorCode:selrow},{EVENT_OK:function(param){
+   		 	alert('返回:'+param.name);
+   	 	}});
+	}
+	function ${name}name_formater(data,d2,d3,d4){
+		var showext = "鼠标点击的是"+data+";这一行的ID是"+d2.rowId;
+		return "<a href=\"#\" onclick=\"alert('"+showext+"')\">"+data+"</a>";
+	}
+	function getSelectedRowIDs(){
+		return jQuery('#${name}Table').getGridParam('selarrrow');//多选
+	}
+	function getSelectedRowID(){
+ 		return jQuery('#${name}Table').getGridParam('selrow');//单选
+	} 
+	
+	//操作列生成Button
+	function ${name}Column_formater(data,d2,d3,d4){
+		var alink = "<a href='#' onclick=\"editFun('"+d2.rowId+"')\">编辑</a>&nbsp;&nbsp;&nbsp;" +
+				   	"<a href='#' onclick=\"deleteFun('"+d2.rowId+"')\">删除</a>";
+		return alink;
+		
+	} 
+</script>
+
+</head>
+<body>
+<div id="Title_bar">
+		<div id="Title_bar_Head">
+			<div id="Title_Head"></div>
+			<div id="Title">
+				<img border="0" width="13" height="13" src="<%=path %>/images/plugins/components/title_arrow.gif">
+				${name}Manager
+			</div>
+			<div id="Title_End"></div>
+			<div id="Title_bar_bg"></div>
+		</div>
+		<div id="Title_bar_Tail">
+			<div id="Title_FuncBar">
+				<ul>
+					<li class="line"></li>
+					<li class="title">
+						<a onclick="deleteSelectedsFun();">
+							<div class="Btn">
+								多选删除
+							</div>
+						</a>
+					</li>
+					<li class="line"></li>
+					<li class="title">
+						<a onclick="showFun();">
+							<div class="Btn">
+								查看
+							</div>
+						</a>
+					</li>
+					<li class="line"></li>
+					<li class="title">
+						<a onclick="addFun();">
+							<div class="Btn">
+								新增
+							</div>
+						</a>
+					</li>
+					<li class="line"></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div style="float: left; width: 15%;">
+		<ul id="operatorTree" class="tree"></ul>
+	</div>
+	<div style="float: right; width: 85%;">
+		<div id="QueryArea">
+			快速搜索：<input type="text" id="operatorCode">
+			<button onclick="quickSearch();" >搜索</button>
+		</div>
+		<div id="MainArea">
+			<table id="${name}Table" border="0" width="100%"></table> 
+			<div id="${name}Pager"></div> 
+		</div>
+	</div>
+</body>
+</html>

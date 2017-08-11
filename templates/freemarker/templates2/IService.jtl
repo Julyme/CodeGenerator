@@ -1,0 +1,56 @@
+package ${package}.service.${name?uncap_first};
+
+import java.util.List;
+import java.util.Map;
+
+import ${package}.entity.${name?cap_first};
+
+public interface I${name?cap_first}Service {
+
+	/**
+	 * 查询指定属性的值
+	 * 
+	 * @param properties 查询的属性
+	 * @param condition 查询限制条件
+	 * @param needLink 是否外键链接
+	 * @param curPage 当前显示的页数
+	 * @param limit 每页显示数量
+	 * @return
+	 */
+	public List<Map<String, Object>> findMapByPropertiesWithLimit(String[] properties,
+			String condition, String sortField, String order, boolean needLink, int curPage, int limit);
+	
+	public List<Map<String, Object>> findMapByProperties(String[] properties,
+			String condition, String sortField, String order, boolean needLink);
+	
+	public int findCountByProperties(String[] properties,
+			String condition, boolean needLink);
+
+	public List<${name?cap_first}> find${name?cap_first}ByProperties(String[] properties,
+			String condition, boolean needLink, int index, int limit);
+	
+	public Map<String, Object> get${name?cap_first}(String[] properties,
+			String condition, boolean needLink);
+	
+	public boolean saveWithMap(Map<String, Object> value);
+	
+	public boolean saveWithEntity(${name?cap_first} value);
+
+	public Map<String, Object> saveAndReturn(Map<String, Object> value);
+
+	public Map<String, Object> saveAndReturn(${name?cap_first} value);
+	
+	public Map<String, Object> saveAndReturnMap(Map<String, Object> value);
+	
+	public Map<String, Object> saveAndReturnEntity(${name?cap_first} value);
+
+	public boolean deleteById(String id);
+
+	public boolean deleteByEntity(${name?cap_first} value);
+
+	public boolean deleteByIds(String[] ids);
+
+	public boolean deleteByEntitys(${name?cap_first}[] values);
+	
+	public int update${name?cap_first}(${name?cap_first} data, String condition);
+}

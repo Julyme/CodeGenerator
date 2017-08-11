@@ -1,0 +1,11 @@
+package ${package}.dao.${name?uncap_first};
+
+import java.util.List;
+
+import ${package}.entity.${name};
+
+public interface I${name}EntityDao {
+
+	public List<${name}> find${name}s (String[] property,
+			String condition, boolean needLink, int index, int limit);
+}

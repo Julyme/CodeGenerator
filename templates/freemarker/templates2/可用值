@@ -1,0 +1,92 @@
+//freemaker key :value
+---------------------------
+<#list importData as imda> 
+import ${imda};
+</#list>
+---------------------------
+${package}
+---------------------------
+/**
+ * ${note}
+ * 
+ * <#if (author?length > 0)>@author ${author}</#if>
+ * 
+ */
+ ---------------------------
+ ${name}
+ ${name?lower_case}
+ ${name?cap_first}
+ ---------------------------
+<#list properties as pro> 
+	"${pro.proName}"<#if pro_has_next>,</#if>
+</#list>
+---------------------------
+<#list properties as pro> 
+	${pro.proType}.class<#if pro_has_next>,</#if> 
+</#list>
+---------------------------
+
+<#list properties as pro>
+	<#if (pro.note?length > 0)>
+	/**
+	 * ${pro.fieldNote}
+	 * ${pro.note}
+	 */
+	 </#if>
+	<#if pro.isId == 1>@Id<#elseif pro.isId == 0>@Column<#else>@Transient</#if><#if pro.isText>(columnDefinition="Text")</#if>
+	public ${pro.proType} get${pro.proName?cap_first}() {
+		Object obj = getProperties().get(PROPERTICE_NAME[${pro.index}]);
+		<#switch pro.proType>
+			<#case "String">
+		    return obj != null ? obj.toString() : null;
+			<#break>
+		  	<#case "boolean">
+		  	<#case "Boolean">
+		    return obj != null ? (Boolean)obj : false;
+			<#break>
+			<#case "int">
+			<#case "Integer">
+		    return obj != null ? (Integer)obj : 0;
+			<#break>
+			<#case "Date">
+		    return obj != null ? (Date)obj : null;
+			<#break>
+			<#case "short">
+			<#case "Short">
+		    return obj != null ? (Short)obj : 0;
+			<#break>
+			<#case "long">
+			<#case "Long">
+		    return obj != null ? (Long)obj : 0;
+			<#break>
+			<#case "float">
+			<#case "Float">
+		    return obj != null ? (Float)obj : 0;
+			<#break>
+			<#case "double">
+			<#case "Double">
+		    return obj != null ? (Double)obj : 0;
+			<#break>
+		</#switch>
+	}
+
+	public void set${pro.proName?cap_first}(${pro.proType} ${pro.proName}) {
+		getProperties().put(PROPERTICE_NAME[${pro.index}], ${pro.proName});
+	}
+	
+	<#if pro.isId == 1>
+	@Transient
+	@Override
+	public String getEntityKey() {
+		return get${pro.proName?cap_first}();
+	}
+
+	@Transient
+	@Override
+	public void setEntityKey(String key) {
+		set${pro.proName?cap_first}(key);
+	}
+	
+	</#if>
+	</#list>	
+---------------------------

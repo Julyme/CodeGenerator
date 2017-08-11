@@ -1,0 +1,55 @@
+<%--外部依赖项
+JsCssLoader.java
+
+ --%>
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%-- 如果需要struts标签库支持
+<%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@ taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+--%>
+<%-- 处理basepath --%>
+<%@ page language="java" import="java.util.*"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://"
+			+ request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+<!DOCTYPE html>
+<html>
+<head>
+<%--处理basepath--%>
+<base href="<%=basePath%>" />
+<%--   <base/>不处理base--%>
+<title>${asiaName}管理</title>
+<%--JsCssLoader--%>
+<%@ page import="${package}.util.JsCssLoader"%>
+<%
+	JsCssLoader loader = new JsCssLoader(
+			"common,jquery,dwr,watermark,ObjectTemplate,util,jqgrid,dialog");//参看jscss文件
+%>
+<%=loader.getCssFilesStr()%>
+<%=loader.getJsFilesStr()%>
+<%--禁用页面缓存
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">过期时间
+--%>
+<meta http-equiv="description" content="${note}管理">
+<!--
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	-->
+<%-- 与实体相关的js 和 	css--%>
+<script type='text/javascript' src='dwr/interface/${name}Service.js'></script>
+<%-- 与jsp session相关的东西放入js中 --%>
+<script type='text/javascript' src='js/manage/${name?lower_case}/${name}Manage.js'></script>
+</head>
+<body style="height:100%;background: transparent;">
+	<div id="container">
+		<table id="grid"></table>
+		<div id="pager"></div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+package  ${ package };  
+  
+//这个地方可以事先定义好需要的类   
+import  java.util.Date;  
+  
+import  java.io.Serializable;  
+  
+public   class  ${name}  implements  Serializable{  
+<#list properties as pro>  
+    private  ${pro.proType} ${pro.proName};  
+</#list>  
+      
+<#list properties as pro>  
+    public   void  set<@upperFC>${pro.proName}</@upperFC>(${pro.proType} ${pro.proName}){  
+        this .${pro.proName}=${pro.proName};  
+    }  
+      
+    public  ${pro.proType} get<@upperFC>${pro.proName}</@upperFC>(){  
+        return   this .${pro.proName};  
+    }  
+      
+</#list>  
+}  

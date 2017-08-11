@@ -1,0 +1,181 @@
+package ${package}.service.${name?uncap_first};
+
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
+import javax.annotation.Resource;
+
+import org.directwebremoting.annotations.RemoteMethod;
+import org.directwebremoting.annotations.RemoteProxy;
+import org.springframework.stereotype.Controller;
+
+import ${package}.dao.ICommonDao;
+import ${package}.dao.${name?uncap_first}.I${name}EntityDao;
+import ${package}.dao.${name?uncap_first}.I${name}MapDao;
+import ${package}.entity.${name};
+
+@Controller  
+@RemoteProxy
+public class ${name}Service implements I${name}Service {
+
+	@Resource(name = "${name?uncap_first}MapDao")
+	private I${name}MapDao mapDao;
+	@Resource(name = "${name?uncap_first}EntityDao")
+	private I${name}EntityDao entityDao;
+	@Resource(name = "commonDao")
+	private ICommonDao commonDao;
+
+	@RemoteMethod
+	public List<Map<String, Object>> findMapByPropertiesWithLimit(String[] properties,
+			String condition, String sortField, String order, boolean needLink, int curPage, int limit) {
+		List<Map<String, Object>> data = mapDao.find${name}s(properties, condition, sortField, order, needLink, ((curPage-1)*limit), limit);
+		
+		return data;
+	}
+	
+	@RemoteMethod
+	public List<Map<String, Object>> findMapByProperties(String[] properties,
+			String condition, String sortField, String order, boolean needLink) {
+		List<Map<String, Object>> data = mapDao.find${name}s(properties, condition, sortField, order, needLink, -1, -1);
+		
+		return data;
+	}
+	
+	@RemoteMethod
+	public List<Map<String, Object>> findMapByPropertiesQuick(String[] properties,
+			String condition, boolean needLink) {
+		List<Map<String, Object>> data = mapDao.find${name}s(properties, condition, "", "", needLink, -1, -1);
+		
+		return data;
+	}
+	
+	@RemoteMethod
+	public Map<String, Object> get${name}(String[] properties,
+			String condition, boolean needLink){
+		List<Map<String, Object>> data = mapDao.find${name}s(properties, condition, "", "", needLink, -1, -1);
+		
+		return data != null && data.size() > 0 ? data.get(0) : null;
+	}
+	
+	@RemoteMethod
+	public int findCountByProperties(String[] properties,
+			String condition, boolean needLink){
+		int length = mapDao.findCount(properties, condition, needLink);
+		return length;
+	}
+	
+	public List<${name}> find${name}ByProperties(String[] properties,
+			String condition, boolean needLink, int index, int limit) {
+		return entityDao.find${name}s(properties, condition, needLink, index, limit);
+	}
+
+	@RemoteMethod
+	public boolean deleteById(String id) {
+		try {
+			commonDao.delete(${name}.class, id);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	@RemoteMethod
+	public boolean deleteByEntity(${name} value) {
+		return deleteById(value.get${keyField.name?cap_first}());
+	}
+
+	@RemoteMethod
+	public boolean deleteByIds(String[] ids) {
+		try {
+			commonDao.delete(${name}.class, ids);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	@RemoteMethod
+	public boolean deleteByEntitys(${name}[] values) {
+		String[] ids = new String[values.length];
+		int index = 0;
+		for (${name} item : values) {
+			ids[index++] = item.get${keyField.name?cap_first}();
+		}
+		return deleteByIds(ids);
+	}
+
+	
+	@RemoteMethod
+	public boolean saveWithMap(Map<String, Object> value) {
+		return saveWithEntity(new ${name}(value));
+	}
+	
+	@Override
+	@RemoteMethod
+	public boolean saveWithEntity(${name} value) {
+		return commonDao.merge(value) != null ? true : false;
+	}
+
+	@RemoteMethod
+	public Map<String, Object> saveAndReturn(Map<String, Object> value) {
+		return saveAndReturn(new ${name}(value));
+	}
+
+	@RemoteMethod
+	public Map<String, Object> saveAndReturn(${name} value) {
+		${name} ${name?uncap_first} = (${name}) commonDao.merge(value);
+		if (${name?uncap_first} != null) {
+			return ${name?uncap_first}.getProperties();
+		}
+		return null;
+	}
+	
+	@RemoteMethod
+	public Map<String, Object> saveAndReturnMap(Map<String, Object> value) {
+		return saveAndReturn(new ${name}(value));
+	}
+	
+	@Override
+	@RemoteMethod
+	public Map<String, Object> saveAndReturnEntity(${name} value) {
+		${name} ${name?uncap_first} = (${name}) commonDao.merge(value);
+		if (${name?uncap_first} != null) {
+			return ${name?uncap_first}.getProperties();
+		}
+		return null;
+	}
+	
+	@Override
+	@RemoteMethod
+	public int update${name}(${name} data, String condition) {
+		return mapDao.update${name}(data.getProperties(), condition);
+	}
+	
+	@RemoteMethod
+	public Map<String,Object> dwrFunForJqGrid(String [] properties, String condition,String sortField, String order, int curPage, int limit)
+	{
+		Map<String, Object> result = new HashMap<String, Object>();
+		int recordes = findCountByProperties(properties,condition,false);
+		if(limit <= 0)
+		{
+			limit = 10;
+		}
+		int totalpage = 0;
+		if(recordes%limit == 0)
+		{
+			totalpage = recordes/limit;
+		}else
+		{
+			totalpage = recordes/limit+1;
+		}
+		result.put("page", curPage);
+		result.put("total", totalpage);
+		result.put("records", recordes);
+		List<Map<String,Object>> rows = findMapByPropertiesWithLimit(properties, condition, sortField, order, false,curPage, limit);
+		result.put("rows", rows);
+		return result;
+	}
+}
