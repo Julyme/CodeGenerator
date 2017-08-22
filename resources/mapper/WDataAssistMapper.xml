@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.julyme.test.mapper.WDataAssistMapper">
+
+	<!-- 查询所有部门信息 -->
+	<select id="findAllWDataAssist" resultType="WDataAssist">
+		select * from WDataAssist
+	</select>
+
+	<!-- 添加部门 -->
+	<insert id="addWDataAssist" parameterType="WDataAssist">
+		<selectKey keyProperty="dept_Id" order="AFTER" resultType="java.lang.Integer">
+			select
+			LAST_INSERT_ID()
+		</selectKey>
+		insert into
+		WDataAssist(dept_Id,deptName)
+		values(#{dept_Id},#{deptName})
+	</insert>
+
+	<!-- 删除部门 -->
+	<delete id="deleteWDataAssist" parameterType="int">
+		delete from WDataAssist
+		where dept_Id=#{dept_Id}
+	</delete>
+
+	<!-- 更新部门 -->
+	<update id="updateWDataAssist" parameterType="WDataAssist">
+		update WDataAssist set
+		deptName=#{deptName}
+		where dept_Id=#{dept_Id}
+	</update>
+	<!-- 总条数 -->
+	<select id="totalSize" resultType="int">
+		select count(*) from WDataAssist
+	</select>
+</mapper>

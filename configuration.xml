@@ -16,13 +16,43 @@
         </database>
     </connections>
     <targetProject>C:\Users\Administrator\Desktop\代码生成</targetProject>
-    <basePackage>org.joy</basePackage>
+    <basePackage>org.julyme</basePackage>
     <moduleName>test</moduleName>
     <templates>
-        <template engine="freemarker" id="entity1" name="实体类" selected="true">
-            <templateFile>entity.ftl</templateFile>
+        <template engine="freemarker" id="entity" name="entity" selected="true">
+            <templateFile>ssm/Entity.ftl</templateFile>
             <targetPath>${targetProject}\src\${basePackage}\${moduleName}\entity\</targetPath>
             <targetFileName>${table.className}.java</targetFileName>
+            <encoding>UTF-8</encoding>
+        </template>
+        <template engine="freemarker" id="service" name="service" selected="true">
+            <templateFile>ssm/Service.ftl</templateFile>
+            <targetPath>${targetProject}\src\${basePackage}\${moduleName}\service\</targetPath>
+            <targetFileName>${table.className}Service.java</targetFileName>
+            <encoding>UTF-8</encoding>
+        </template>
+        <template engine="freemarker" id="serviceImpl" name="serviceImpl" selected="true">
+            <templateFile>ssm/ServiceImpl.ftl</templateFile>
+            <targetPath>${targetProject}\src\${basePackage}\${moduleName}\serviceImpl\</targetPath>
+            <targetFileName>${table.className}ServiceImpl.java</targetFileName>
+            <encoding>UTF-8</encoding>
+        </template>
+        <template engine="freemarker" id="mapper" name="mapper" selected="true">
+            <templateFile>ssm/Mapper.ftl</templateFile>
+            <targetPath>${targetProject}\src\${basePackage}\${moduleName}\mapper\</targetPath>
+            <targetFileName>${table.className}Mapper.java</targetFileName>
+            <encoding>UTF-8</encoding>
+        </template>
+        <template engine="freemarker" id="mapper_xml" name="mapper_xml" selected="true">
+            <templateFile>ssm/Mapper_xml.ftl</templateFile>
+            <targetPath>${targetProject}\resources\mapper\</targetPath>
+            <targetFileName>${table.className}Mapper.xml</targetFileName>
+            <encoding>UTF-8</encoding>
+        </template>
+        <template engine="freemarker" id="controller" name="controller" selected="true">
+            <templateFile>ssm/Controller.ftl</templateFile>
+            <targetPath>${targetProject}\src\${basePackage}\${moduleName}\controller\</targetPath>
+            <targetFileName>${table.className}Controller.java</targetFileName>
             <encoding>UTF-8</encoding>
         </template>
     </templates>
